@@ -11,11 +11,12 @@ from sklearn.metrics import r2_score, mean_squared_error
 
 class TimeLinear():
 
-    def __init__(self, target, time, variable):
+    def __init__(self, target, time, variable, modify):
 
         self._target = target
         self._time = time
         self._variable = variable
+        self._modify = modify
         self._set_analyzer_variable()
         self._read_process_data()
 
@@ -36,6 +37,10 @@ class TimeLinear():
     def _select_data(self):
 
         self.liner_df = self.data[self._sum_time + self._mean_variable + self._sum_target]
+
+        if (self._modify is not None) & (self._target[0] == "ARO2-LIMS-s922@MX"):
+            self.liner_df = self.liner_df.loc[self.liner_df[self._sum_target[0]] < self._modify]
+
         self.liner_df = self.liner_df.dropna()
 
 

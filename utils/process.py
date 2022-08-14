@@ -51,9 +51,9 @@ class ProcessData():
 
         self.df = self.df.loc[self.df["ARO2-DCS-FI91601"] > remove_FI91601_value,:]
         if self._target[0] == "ARO2-LIMS-s922@MX":
-            self.df = self.df.loc[self.df[self._target[0]] < 1700,:]
+            self.df.loc[self.df[self._target[0]] > 1700,:] = np.nan
         else:
-            self.df = self.df.loc[self.df[self._target[0]] < 4,:]
+            self.df.loc[self.df[self._target[0]] < 4, :] = np.nan
 
         self.df.reset_index(inplace=True, drop=True)
 
@@ -90,35 +90,36 @@ class ProcessData():
 
     def calculate_btw_time_and_traget(self):
 
-        index_list = self.df.index
         for item in self._time+ self._target:
-            for index in range(len(index_list) - 1):
-                self.df.loc[index_list[index + 1], "btw_" + item] =  self.df.loc[index_list[index + 1], item] - self.df.loc[index_list[index], item]
+            for index in range(len(self._index_list) - 1):
+                self.df.loc[self._index_list[index + 1], "btw_" + item] =  self.df.loc[self._index_list[index + 1], item] - self.df.loc[self._index_list[index], item]
 
 
     def calculate_target_time_variable(self):
 
+        self._index_list = self.df[pd.notna(self.df[self._target[0]])].index
         self.calculate_btw_time_and_traget()
-        index_list = self.df.index
         n = 0
-        for index in index_list[1:]:
-            if self.df.loc[index, "btw_" + self._target[0]] > 0:
-                if index == index_list[len(index_list)-1]:
-                    self.df.loc[index, "sum_" + self._target[0]] = self.df.loc[(index - n):, "btw_" + self._target[0]].sum()
-                    self.df.loc[index, "sum_" + self._time[0]] = self.df.loc[(index - n):, "btw_" + self._time[0]].sum()
+        for index in range(len(self._index_list)):
+            if self.df.loc[self._index_list[index], "btw_" + self._target[0]] > 0:
+                if self._index_list[index] == self._index_list[len(self._index_list)-1]:
+                    self.df.loc[self._index_list[index], "sum_" + self._target[0]] = self.df.loc[self._index_list[index-n]:, "btw_" + self._target[0]].sum()
+                    self.df.loc[self._index_list[index], "sum_" + self._time[0]] = self.df.loc[self._index_list[index-n]:, "btw_" + self._time[0]].sum()
                     for variable in self._variable:
-                        self.df.loc[index, "mean_" + variable] = self.df.loc[(index - n):, variable].mean()
+                        self.df.loc[self._index_list[index], "mean_" + variable] = self.df.loc[(self._index_list[index-n-1]+1):, variable].mean()
                 else:
                     n = n + 1
             else:
-                if index != 1:
+                if self._index_list[index] != self._index_list[0]:
                     if n != 0:
-                        self.df.loc[(index - 1), "sum_" + self._target[0]] = self.df.loc[(index - n):(index - 1), "btw_" + self._target[0]].sum()
-                        self.df.loc[(index - 1), "sum_" + self._time[0]] = self.df.loc[(index - n):(index - 1), "btw_" + self._time[0]].sum()
+                        self.df.loc[self._index_list[index-1], "sum_" + self._target[0]] = self.df.loc[self._index_list[index-n]:self._index_list[index-1], "btw_" + self._target[0]].sum()
+                        self.df.loc[self._index_list[index-1], "sum_" + self._time[0]] = self.df.loc[self._index_list[index-n]:self._index_list[index-1], "btw_" + self._time[0]].sum()
                         for variable in self._variable:
-                            self.df.loc[(index - 1), "mean_" + variable] = self.df.loc[(index - n):(index - 1), variable].mean()
+                            self.df.loc[self._index_list[index-1], "mean_" + variable] = self.df.loc[(self._index_list[index-n-1]+1):self._index_list[index-1], variable].mean()
 
                 n = 0
+
+        self.write_csv()
 
 
     def write_csv(self):
