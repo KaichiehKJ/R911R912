@@ -51,9 +51,9 @@ class ProcessData():
 
         self.df = self.df.loc[self.df["ARO2-DCS-FI91601"] > remove_FI91601_value,:]
         if self._target[0] == "ARO2-LIMS-s922@MX":
-            self.df.loc[self.df[self._target[0]] > 1700,:] = np.nan
+            self.df.loc[self.df[self._target[0]] > 1700, self._target[0]] = np.nan
         else:
-            self.df.loc[self.df[self._target[0]] < 4, :] = np.nan
+            self.df.loc[self.df[self._target[0]] > 4, self._target[0]] = np.nan
 
         self.df.reset_index(inplace=True, drop=True)
 
@@ -82,15 +82,16 @@ class ProcessData():
 
     def fill_value(self, method):
 
+        # self._process_str_in_cell()
         if method == "knn":
-            self._knn_method
+            self._knn_method()
         elif method == "pd_fill":
             self._pd_fill_method()
 
 
     def calculate_btw_time_and_traget(self):
 
-        for item in self._time+ self._target:
+        for item in self._time + self._target:
             for index in range(len(self._index_list) - 1):
                 self.df.loc[self._index_list[index + 1], "btw_" + item] =  self.df.loc[self._index_list[index + 1], item] - self.df.loc[self._index_list[index], item]
 
@@ -119,12 +120,12 @@ class ProcessData():
 
                 n = 0
 
-        self.write_csv()
-
 
     def write_csv(self):
 
         path = "result/data/process_{target}_data.csv".format(target = self._target[0])
+
+
         self.df.to_csv(path)
 
 

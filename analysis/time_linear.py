@@ -46,6 +46,7 @@ class TimeLinear():
 
     def _split_data(self):
         # splitting the data
+
         self._x_train, self._x_test, self._y_train, self._y_test = train_test_split(self.liner_df[self._sum_time + self._mean_variable],
                                                                                     self.liner_df[self._sum_target[0]], test_size = 0.2,
                                                                                     random_state = 42)
@@ -65,7 +66,7 @@ class TimeLinear():
         return [r2, mse, rmse]
 
 
-    def _write_text(self, method, score, model_info):
+    def _write_text(self, method, score, model_info, degree):
 
         current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -75,10 +76,13 @@ class TimeLinear():
         rmse_text = "RMSE = {rmse}\n".format(rmse = score[2])
         slope_text = "slope : {slope}\n".format(slope = model_info[0].tolist())
         intercept_text = "intercept : {intercept}\n".format(intercept = model_info[1].tolist())
+        degree_text = "degree :{degree}\n".format(degree = degree)
 
         with open(path, 'a') as f:
             f.write(current_time + "\n")
             f.write(method + ":\n")
+            if method == "polynomial":
+                f.write(degree_text)
             f.write(r2_text)
             f.write(mse_text)
             f.write(rmse_text)
@@ -105,4 +109,4 @@ class TimeLinear():
             else:
                 model_info = [model.coef_, model.intercept_]
 
-            self._write_text(method, score, model_info)
+            self._write_text(method, score, model_info, degree)
