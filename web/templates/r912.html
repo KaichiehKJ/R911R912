@@ -1,0 +1,109 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>calculator</title>
+        <link rel="stylesheet" type="text/css" href="/static/css/r912.css"/>
+    </head>
+
+    <body>
+        <div class="title">
+            <div class="title-text">
+                R912 時間推估
+            </div>
+            <div class="title-note">
+                <div class="block">
+                    <div class="block-text">
+                        Input:
+                    </div>
+                    <div class="block-fig-1"></div>
+                </div>
+                <div class="block">
+                    <div class="block-text">
+                        Output:
+                    </div>
+                    <div class="block-fig-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="link">
+            <a class="btn" href="{% url 'r911' %}">
+                R911
+            </a>
+            <a class="btn" href="{% url 'mx' %}">
+                MX
+            </a>
+        </div>
+        <form action="{% url 'r912' %}" method="post">
+            {% csrf_token %}
+            <div class="body">
+                <div class="side-body">
+                    <div class="side-body-title">Input:Data</div>
+    
+                    <div class="input">
+                        <div class="input-title">1.進料量:</div>
+                        <div class="input-fig">
+                            <input type="text" id="number" name="FI91601" required="required"/>
+                        </div>
+                    </div>
+                    <div class="input">
+                        <div class="input-title">2.萃取油含水量:</div>
+                        <div class="input-fig">
+                            <input type="text" id="number" name="LIMS-S905@Water" required="required"/>
+                        </div>
+                    </div>
+                    <div class="input">
+                        <div class="input-title">3.萃餘油含水量:</div>
+                        <div class="input-fig">
+                            <input type="text" id="number" name="LIMS-S907@Water" required="required"/>
+                        </div>
+                    </div>
+                    <div class="input">
+                        <div class="input-title">4.FA:</div>
+                        <div class="input-fig">
+                            <input type="text" id="number" name="FA" required="required"/>
+                        </div>
+                    </div>
+                    <div class="input">
+                        <div class="input-title">5.L2:</div>
+                        <div class="input-fig">
+                            <input type="text" id="number" name="L2" required="required"/>
+                        </div>
+                    </div>
+                    <div class="input">
+                        <div class="input-title">6.現有壓差與上限差距:</div>
+                        <div class="input-fig">
+                            <input type="text" id="number" name="PDI91201" required="required"/>
+                        </div>
+                    </div>
+                    <div class="input">
+                        <button class="button" type="submit">Analysis</button>
+                    </div>
+                </div>
+    
+                <div class="side-body">
+                    <div class="side-body-title">Output:Time</div>
+    
+                    <div class="method">
+                        <div class="method-title">1.Linear:</div>
+                        <div class="method-fig">
+                            <div class="output-text">{{Linear}}</div>
+                        </div>
+                    </div>
+                    <div class="method">
+                        <div class="method-title">2.Lasso:</div>
+                        <div class="method-fig">
+                            <div class="output-text">{{Lasso}}</div>
+                        </div>
+                    </div>
+                    <div class="method">
+                        <div class="method-title">3.Polynomial(2次方):</div>
+                        <div class="method-fig">
+                            <div class="output-text">{{Polynomial}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </body>
+</html>

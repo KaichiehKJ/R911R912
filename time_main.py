@@ -36,7 +36,7 @@ if __name__=="__main__":
     remove_FI91601_value = 470  # 520, 470
     method = "knn"          # pd_fill, knn
     alpha = 0.1
-    degree = 3
+    degree = 2
     methods = ["polynomial"] # ["linear_regression", "lasso", "polynomial"]
 
 

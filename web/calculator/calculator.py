@@ -1,0 +1,168 @@
+
+from sympy import *
+
+def R911_linear(FI91601, LIMS_S905_Water, LIMS_S907_Water, FA, L2, PDI91101):
+    
+    FI91601 = (-0.004489770726215088 * FI91601)
+    LIMS_S905_Water = (0.0006270402096767311 * LIMS_S905_Water)
+    LIMS_S907_Water = (-0.00020478015206089654 * LIMS_S907_Water)
+    FA = (-6.45991524705064 * FA)
+    L2 = (0.3188703347165896 * L2)
+    
+    time = round((PDI91101 - FI91601 - LIMS_S905_Water - LIMS_S907_Water - FA - L2 - 5.664822222619688) / 0.00222394884903363, 2)
+
+    return time
+
+
+def R911_lasso(FI91601, LIMS_S905_Water, LIMS_S907_Water, FA, L2, PDI91101):
+    
+    FI91601 = (-0.00471976310271552 * FI91601)
+    LIMS_S905_Water = (0.0009278350740070129 * LIMS_S905_Water)
+    LIMS_S907_Water = (0 * LIMS_S907_Water)
+    FA = (0 * FA)
+    L2 = (0 * L2)
+    
+    time = round((PDI91101 - FI91601 - LIMS_S905_Water - LIMS_S907_Water - FA - L2 - 2.727868557097733) / 0.000583653068791821, 2)
+
+    return time
+
+
+def R911_polynomial(FI91601, LIMS_S905_Water, LIMS_S907_Water, FA, L2, PDI91101):
+    # ['1', 
+    # 'time', 'FI91601', 'LIMS_S905_Water', 'LIMS_S907_Water', 'FA', 'L2', 
+    # 'time^2', 'time FI91601', 'time LIMS_S905_Water', 'time LIMS_S907_Water', 'time FA', 'time L2',
+    # 'FI91601^2', 'FI91601 LIMS_S905_Water', 'FI91601 LIMS_S907_Water', 'FI91601 FA', 'FI91601 L2', 
+    # 'LIMS_S905_Water^2', 'LIMS_S905_Water LIMS_S907_Water', 'LIMS_S905_Water FA', 'LIMS_S905_Water L2',
+    # 'LIMS_S907_Water^2', 'LIMS_S907_Water FA', 'LIMS_S907_Water L2',
+    # 'FA^2', 'FA L2',
+    # 'L2^2']
+    
+    slope = [-1.0950586625610163e-09, -0.5088103404481195, 0.1347542498096784, -0.004341607300622261, -0.010821838030085235, -26.074628003370147,
+            38.31331188884118, -9.991780745048683e-06, 0.0009720457094480918, -0.00035281159588124926, -2.125567496829298e-06, 0.18240115374918417,
+            -0.03782210808780325, -7.184392111292404e-05, -1.2364893802768728e-05, 2.5182233180653935e-06, -0.13461854958188602, 0.003434139065916384,
+            6.671217599027966e-06, -5.937806147573305e-06, 0.022391042808264594, 0.001940196179417742, 9.37057601416158e-07, 0.018243659954072, 
+            0.0028741761017568057, 120.88304658452827, -82.66907037059241, -0.3599594380170848]
+    
+    time = symbols("time")
+    x = 1 * slope[0] + FI91601 * slope[2] + LIMS_S905_Water * slope[3] + LIMS_S907_Water * slope[4] + FA * slope[5] + L2 * slope[6]
+    y = (FI91601**2) * slope[13] + FI91601 * LIMS_S905_Water * slope[14] + FI91601 * LIMS_S907_Water * slope[15] + FI91601 * FA * slope[16] + FI91601 * L2 * slope[17]
+    z = (LIMS_S905_Water**2) * slope[18] + LIMS_S905_Water * LIMS_S907_Water * slope[19] + LIMS_S905_Water * FA * slope[20] + LIMS_S905_Water * L2 * slope[21]
+    i = (LIMS_S907_Water**2) + slope[22] + LIMS_S907_Water * FA * slope[23] + LIMS_S907_Water * L2 * slope[24]
+    j = (FA**2) * slope[27] + FA * L2 * slope[26] + (L2**2) * slope[25]
+    intercept =  -32.24667827558364
+    content = x + y + z + i + j + intercept - PDI91101
+    result = solve(time * slope[1]  + (time**2) * slope[7] + time * FI91601 * slope[8] + time * LIMS_S905_Water * slope[9] + time * LIMS_S907_Water * slope[10] + time * FA * slope[11] + time * L2 * slope[12] + content)
+    result = round(max(result), 2)
+
+    return result
+
+
+def R912_linear(FI91601, LIMS_S905_Water, LIMS_S907_Water, FA, L2, PDI91201):
+    
+    FI91601 = (-0.005458876339946124 * FI91601)
+    LIMS_S905_Water = (0.0002639987715976114 * LIMS_S905_Water)
+    LIMS_S907_Water = (-0.00012969939595066792 * LIMS_S907_Water)
+    FA = (-7.562344420317903 * FA)
+    L2 = (-0.20303591271714125 * L2)
+    
+    time = round((PDI91201 - FI91601 - LIMS_S905_Water - LIMS_S907_Water - FA - L2 - 6.974861052638397) / 0.002272538187933626, 2)
+
+    return time
+
+
+def R912_lasso(FI91601, LIMS_S905_Water, LIMS_S907_Water, FA, L2, PDI91201):
+    
+    FI91601 = (-0.005726616864270265 * FI91601)
+    LIMS_S905_Water = (0.0008303689747451638 * LIMS_S905_Water)
+    LIMS_S907_Water = (0 * LIMS_S907_Water)
+    FA = (0 * FA)
+    L2 = (0 * L2)
+    
+    time = round((PDI91201 - FI91601 - LIMS_S905_Water - LIMS_S907_Water - FA - L2 - 3.332346274008742) / 0.0008994505706449107, 2)
+
+    return time
+
+
+def R912_polynomial(FI91601, LIMS_S905_Water, LIMS_S907_Water, FA, L2, PDI91201):
+    
+    slope = [5.919807529057832e-08, 0.1327811753439564, 0.18414235924139286, -0.013569499807477767, -0.01003026323616815, -128.31649877515457,
+            38.102468337536045, -2.0843902250341053e-06, 0.0007730754597249151, -0.0013275059611675625, 0.0005752538055928011, -1.041790682505199,
+            0.18673998079906542, -9.546218426018105e-05, 8.098529623707523e-06, -1.6773051471019595e-05, -0.2043620650453521, 0.029776741269794856,
+            2.401691213189563e-06, 1.486652686761604e-06, 0.02508933824911162, -0.0010929135757479363, 3.157092838415934e-06, 0.03346106889977948,
+            0.0022551565345956654, 279.16064271780675, -129.9332377404686, 11.966874791655403]
+    
+    time = symbols("time")
+    x = 1 * slope[0] + FI91601 * slope[2] + LIMS_S905_Water * slope[3] + LIMS_S907_Water * slope[4] + FA * slope[5] + L2 * slope[6]
+    y = (FI91601**2) * slope[13] + FI91601 * LIMS_S905_Water * slope[14] + FI91601 * LIMS_S907_Water * slope[15] + FI91601 * FA * slope[16] + FI91601 * L2 * slope[17]
+    z = (LIMS_S905_Water**2) * slope[18] + LIMS_S905_Water * LIMS_S907_Water * slope[19] + LIMS_S905_Water * FA * slope[20] + LIMS_S905_Water * L2 * slope[21]
+    i = (LIMS_S907_Water**2) + slope[22] + LIMS_S907_Water * FA * slope[23] + LIMS_S907_Water * L2 * slope[24]
+    j = (FA**2) * slope[27] + FA * L2 * slope[26] + (L2**2) * slope[25]
+    intercept =  -19.729742806477475
+    content = x + y + z + i + j + intercept - PDI91201
+    result = solve(time * slope[1]  + (time**2) * slope[7] + time * FI91601 * slope[8] + time * LIMS_S905_Water * slope[9] + time * LIMS_S907_Water * slope[10] + time * FA * slope[11] + time * L2 * slope[12] + content)
+    result = round(max(result), 2)
+
+    return result
+
+def MX_linear(FI91601, LIMS_S708_Br_Index, LIMS_S708_A9, LIMS_S708_A10, LIMS_S708_Water, LIMS_S708_Sulfur, 
+              LIMS_s919_A9, LIMS_s919_A10, LIMS_S905_Water, LIMS_S907_Water, FA, L2, mx):
+    
+    FI91601 = (-0.2192520032171638 * FI91601)
+    LIMS_S708_Br_Index = (0.1169036498830991 * LIMS_S708_Br_Index)
+    LIMS_S708_A9 = (-67.54151789158917 * LIMS_S708_A9)
+    LIMS_S708_A10 = (863.5613072310462 * LIMS_S708_A10)
+    LIMS_S708_Water = (0.00020593865918475465 * LIMS_S708_Water)
+    LIMS_S708_Sulfur = (1.3119128229955244 * LIMS_S708_Sulfur)
+    LIMS_s919_A9 = (0.011964330222391285 * LIMS_s919_A9)
+    LIMS_s919_A10 = (0.011964330222391285 * LIMS_s919_A10)
+    LIMS_S905_Water = (0.02127341662049617 * LIMS_S905_Water)
+    LIMS_S907_Water = (-0.02440569498166165 * LIMS_S907_Water)
+    FA = (-82.28030073983571 * FA)
+    L2 = (-43.82636991857343 * L2)
+    
+    time = round((mx - FI91601 - LIMS_S708_Br_Index - LIMS_S708_A9 - LIMS_S708_A10 - LIMS_S708_Water - LIMS_S708_Sulfur - LIMS_s919_A9 - LIMS_s919_A10 - LIMS_S905_Water - LIMS_S907_Water - FA - L2 - 179.34789191010213) / 0.13898741991146374, 2)
+
+    return time
+
+
+def MX_lasso(FI91601, LIMS_S708_Br_Index, LIMS_S708_A9, LIMS_S708_A10, LIMS_S708_Water, LIMS_S708_Sulfur, 
+             LIMS_s919_A9, LIMS_s919_A10, LIMS_S905_Water, LIMS_S907_Water, FA, L2, mx):
+    
+    FI91601 = (-0.23086430951083733 * FI91601)
+    LIMS_S708_Br_Index = (0.10713970768673176 * LIMS_S708_Br_Index)
+    LIMS_S708_A9 = (0 * LIMS_S708_A9)
+    LIMS_S708_A10 = (0 * LIMS_S708_A10)
+    LIMS_S708_Water = (0.00023792560254264967 * LIMS_S708_Water)
+    LIMS_S708_Sulfur = (0 * LIMS_S708_Sulfur)
+    LIMS_s919_A9 = (0.011651668559803069 * LIMS_s919_A9)
+    LIMS_s919_A10 = (0.004932498816112235 * LIMS_s919_A10)
+    LIMS_S905_Water = (0.032950414212017984 * LIMS_S905_Water)
+    LIMS_S907_Water = (-0.015278892382212821 * LIMS_S907_Water)
+    FA = (0 * FA)
+    L2 = (0 * L2)
+    
+    time = round((mx - FI91601 - LIMS_S708_Br_Index - LIMS_S708_A9 - LIMS_S708_A10 - LIMS_S708_Water - LIMS_S708_Sulfur - LIMS_s919_A9 - LIMS_s919_A10 - LIMS_S905_Water - LIMS_S907_Water - FA - L2 - 121.34207314394506) / 0.14195629704252172, 2)
+
+    return time
+
+
+def MX_polynomial(FI91601, LIMS_S708_Br_Index, LIMS_S708_A9, LIMS_S708_A10, LIMS_S708_Water, LIMS_S708_Sulfur, 
+                  LIMS_s919_A9, LIMS_s919_A10, LIMS_S905_Water, LIMS_S907_Water, FA, L2, mx):
+    
+    FI91601 = (-0.21925200321690977 * FI91601)
+    LIMS_S708_Br_Index = (0.11690364988336008 * LIMS_S708_Br_Index)
+    LIMS_S708_A9 = (-67.54151789130312 * LIMS_S708_A9)
+    LIMS_S708_A10 = (863.5613072301774 * LIMS_S708_A10)
+    LIMS_S708_Water = (0.00020593865917288914 * LIMS_S708_Water)
+    LIMS_S708_Sulfur = (1.3119128230103796 * LIMS_S708_Sulfur)
+    LIMS_s919_A9 = (0.011964330222421979 * LIMS_s919_A9)
+    LIMS_s919_A10 = (0.0032547311375946686 * LIMS_s919_A10)
+    LIMS_S905_Water = (0.021273416620704463 * LIMS_S905_Water)
+    LIMS_S907_Water = (-0.02440569498166398 * LIMS_S907_Water)
+    FA = (-82.28030073983697 * FA)
+    L2 = (-43.82636991857313 * L2)
+    
+    time = round((mx - FI91601 - LIMS_S708_Br_Index - LIMS_S708_A9 - LIMS_S708_A10 - LIMS_S708_Water - LIMS_S708_Sulfur - LIMS_s919_A9 - LIMS_s919_A10 - LIMS_S905_Water - LIMS_S907_Water - FA - L2 - 179.34789190992288) / 0.13898741991150665, 2)
+
+    return time
+

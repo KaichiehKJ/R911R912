@@ -1,0 +1,145 @@
+.title {
+    padding: 1%;
+    display: flex;
+    align-items: center;
+}
+
+.title-text{
+    width: 90%;
+    text-align: center;
+    font-size: 24px;
+}
+
+.title-note{
+    width: 10%;
+}
+
+.block {
+    display: flex;
+}
+
+.block-text {
+    width: 50%;
+    text-align:end
+}
+
+.block-fig-1 {
+    margin: 1%;
+    width: 50%;
+    align-items: right;
+    background-color: #98FB98;
+}
+
+.block-fig-2 {
+    margin: 1%;
+    width: 50%;
+    align-items: right;
+    background-color: #FFE4C4;
+}
+
+.link {
+    display: flex;
+    align-items: center;
+}
+.btn {
+    width: 7%;
+    margin: 1%;
+    margin-bottom: 0%;
+    text-align: center;
+    border-radius: 1rem;
+    border-width: thin;
+    background-color: #DDA0DD;
+}
+
+.btn:hover{
+    background-color:#fff;
+    border:2px #DDA0DD solid;
+}
+
+.body {
+    display: flex;
+    margin-top: 1vh;
+    border: 3px solid black;
+    height: 85%;
+    font-size: 20px;
+}
+
+.side-body {
+    margin: 2%;
+    width: 100%;
+}
+
+.side-body-title {
+    text-align: center;
+}
+
+.input {
+    display: flex;
+    width: 100%;
+}
+
+.input-title {
+    margin-top: 5%;
+    margin-bottom: 3%;
+    margin-left: 20%;
+    width: 100%;
+}
+
+.input-fig {
+    margin-top: 5%;
+    margin-bottom: 3%;
+    margin-left: 10%;
+    width: 100%;
+    align-items: center;
+}
+
+[type] {
+    width: 40%;
+    height: 100%;
+    background-color: #98FB98;
+}
+
+.method {
+    display: flex;
+    width: 100%;
+}
+
+.method-title {
+    margin-top: 5%;
+    margin-bottom: 3%;
+    margin-left: 20%;
+    width: 100%;
+}
+
+.method-fig {
+    margin-top: 5%;
+    margin-bottom: 3%;
+    margin-left: 10%;
+    width: 100%;
+    align-items: center;
+}
+
+.output-text {
+    text-align: center;
+    width: 50%;
+    background-color: #FFE4C4;
+}
+
+
+.button {
+    margin-top: 5%;
+    margin-bottom: 3%;
+    margin-left: 20%;
+    width: 25%;
+    text-align: center;
+    border-radius: 1rem;
+    border-width: thin;
+    color: #fff;
+    background-color: #3b71ca;
+}
+
+.button:hover{
+    color:#3b71ca;
+    background-color:#fff;
+    border:2px #3b71ca solid;
+}
