@@ -106,9 +106,9 @@ class TimeLinear():
             score = self._evaluate(y_prediction = y_prediction)
             if method == "polynomial":
                 model_info = [model.steps[1][1].coef_, model.steps[1][1].intercept_]
-                print(model_info)
-                print(model.steps[0][1].get_feature_names(['a', 'b', "c", "d", "e", "f"]))
-                quit()
+                # print(model_info)
+                # print(self._time + self._variable)
+                # print(model.steps[0][1].get_feature_names(self._time + self._variable))
             else:
                 model_info = [model.coef_, model.intercept_]
 
