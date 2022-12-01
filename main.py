@@ -1,12 +1,12 @@
 
-
+import joblib
+from sklearn.metrics import r2_score
 import torch
 from torch.utils.data import TensorDataset,DataLoader
-import joblib
 import numpy as np
 import pandas as pd
-# from tqdm import tqdm_notebook as tqdm
 from model.reinforcement import R2D2, ActorCritic
+from model.CNNLSTM import cnn_lstm
 
 
 class Main():
@@ -52,31 +52,73 @@ class Main():
                                                 np.random.uniform(low = a.loc['50%'][i],
                                                                   high = a.loc['max'][i],
                                                                   size = (self.train_data['value'].shape[0],1))])
+                                                                  
+                                                                  
+    a = pd.DataFrame(self.test_data['value']).describe()
+    self.test_data['request'] = None
+  
+    for i in a.columns:
+      if self.test_data['request'] == None:
+         self.test_data['request'] = np.random.uniform(low = a.loc['50%'][i],
+                                                        high=a.loc['max'][i],
+                                                        size=(self.test_data['value'].shape[0],1))
+      else:
+        self.test_data['request'] = np.hstack([self.test_data['request'],
+                                                np.random.uniform(low = a.loc['50%'][i],
+                                                                  high = a.loc['max'][i],
+                                                                  size = (self.test_data['value'].shape[0],1))])
     
-  def np_convert_tensor(self):
+  def np_convert_tensor(self, dataset):
     # tensor
     for item in ["state", "request", "action", "value"]:
-      self.train_data[item] = torch.FloatTensor(self.train_data[item])
+      dataset[item] = torch.FloatTensor(dataset[item])
+
+    return dataset
     
-  def set_iter(self):
     
-    train_data = TensorDataset(self.train_data['state'], self.train_data['request'], self.train_data['action'], self.train_data['value'])
-    self.train_iter = DataLoader(train_data, batch_size = self.batch_size, shuffle=True)
+  def set_iter(self, dataset):
+    
+    tensor_Dataset = TensorDataset(dataset['state'], dataset['request'], dataset['action'], dataset['value'])
+    data_iter = DataLoader(tensor_Dataset, batch_size = self.batch_size, shuffle=True)
+    
+    return data_iter
     
   def creat_iter(self):
     
     self.set_data_request()
-    self.np_convert_tensor()
-    self.set_iter()
     
+    self.train_data = self.np_convert_tensor(dataset = self.train_data)
+    self.test_data = self.np_convert_tensor(dataset = self.test_data)
     
-  def set_model(self, device):
+    self.train_iter = self.set_iter(dataset = self.train_data)
+    self.test_iter = self.set_iter(dataset = self.test_data)
     
-    actor = R2D2(self.state_size + self.request_size, self.action_size, self.hidden_size)
-    critic = R2D2(self.state_size + self.action_size, self.value_size, self.hidden_size)
-    self.model = ActorCritic(actor, critic, self.time_step, device, self.gpu_id)
-    self.model.cuda(device = self.gpu_id)
+  def init_weights(self, m):
+    if hasattr(m,'weight'):
+        try:
+            torch.nn.init.xavier_uniform(m.weight)
+        except:
+            pass
     
+    if hasattr(m,'bias'):
+        try:
+            m.bias.data.fill_(0.1)
+        except:
+            pass
+  
+  
+  def set_model(self, device, method, hidden_size):
+    
+    if method == "reinforcement":
+      actor = R2D2(self.state_size + self.request_size, self.action_size, self.hidden_size)
+      critic = R2D2(self.state_size + self.action_size, self.value_size, self.hidden_size)
+      self.model = ActorCritic(actor, critic, self.time_step, device, self.gpu_id)
+      self.model.cuda(device = self.gpu_id)
+    elif method == "cnn_lstm":
+      self.model = cnn_lstm(device = device, hidden_size = hidden_size)
+      self.model.cuda(device = self.gpu_id)
+      self.model.apply(self.init_weights)
+      
   
   def train(self, epochs):
     train_history = {}
@@ -101,7 +143,62 @@ class Main():
       train_history['actor'].append(actor_loss)
       if epoch % 10 == 0:
         print('epoch:{} actor_loss:{}'.format(epoch, actor_loss))
-
+        
+  def train_lstm(self, epochs):
+    
+    loss_fn = torch.nn.L1Loss() #
+    optimiser = torch.optim.Adam(self.model.parameters(), lr=0.001)
+    train_history = []
+    
+    for epoch in range(epochs):
+      epoch_loss = 0
+      for i, (bs, _, ba, bv) in enumerate(self.train_iter):
+        if i <= 445: #206, 445
+          y_pred = self.model(state = bs.cuda(device = self.gpu_id), action = ba.cuda(device = self.gpu_id))
+          loss = loss_fn(y_pred, bv.cuda(device = self.gpu_id))
+          # update weights
+          optimiser.zero_grad()
+          loss.backward()
+          optimiser.step()
+          
+          epoch_loss += loss.item()
+      
+      train_history.append(epoch_loss/470)
+      if epoch % 10 == 0:
+        print('epoch:{} loss:{}'.format(epoch, epoch_loss/470))
+        
+  def pred_test(self):
+    
+    def MAE(true, pred):
+      return np.mean(np.abs(true-pred))
+    
+    def mape(a, b): 
+      mask = a != 0
+      return (np.fabs(a - b)/a)[mask].mean()
+    
+    def rmse(true, pred):
+      return np.sqrt(((pred - true) ** 2).mean())
+    
+    real_value = []
+    pred_value = []
+    self.model.eval()
+    
+    for i in range(794):
+      s,r,a,v = next(iter(self.test_iter))
+      y_pred = self.model(state = s.cuda(device = self.gpu_id), action = a.cuda(device = self.gpu_id))
+      
+      pred_value.append(y_pred.cpu().detach().numpy()[0])
+      real_value.append(v.detach().numpy()[0])
+    
+    pred_value = np.array(pred_value)
+    real_value = np.array(real_value)
+    mm_y = self.dataset['mm_scale']["mm_value"]
+    pred_value = mm_y.inverse_transform(pred_value.reshape(-1, 1)).reshape(-1,1)
+    real_value = mm_y.inverse_transform(real_value.reshape(-1, 1)).reshape(-1,1)
+    
+    print('r2', r2_score(real_value[:,0], pred_value[:,0]))
+    print('MAPE',mape(real_value[:,0],pred_value[:,0]))
+    print("RMSE:", rmse(real_value[:,0], pred_value[:,0]))
 
 
 if __name__=="__main__":
@@ -113,11 +210,11 @@ if __name__=="__main__":
   epochs = 100
   gpu_id = 6
   device = "cuda:6"
-  
+
   main = Main(path = path, batch_size = batch_size, hidden_size = hidden_size, gpu_id = gpu_id)
   main.creat_iter()
-  main.set_model(device = device)
-  main.train(epochs = epochs)
-
+  main.set_model(device = device, method = "cnn_lstm", hidden_size = hidden_size)
+  main.train_lstm(epochs = epochs)
+  main.pred_test()
 
 

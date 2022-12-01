@@ -1,13 +1,12 @@
 
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import joblib
-
 
 class process():
   
-  def __init__(self, path, a_col, s_col, y_col, time_step):
+  def __init__(self, path, a_col, s_col, y_col, time_step, scale_method):
     
     self.y_status = False
     
@@ -16,7 +15,7 @@ class process():
     self.y_col = y_col
     self.time_step = time_step
     self.load_xlsx(path = path)
-    self.set_MinMaxScaler()
+    self.set_scaler(scale_method = scale_method)
     
   def set_dataset_dict(self):
     
@@ -31,11 +30,16 @@ class process():
       self.df_y = pd.read_excel(path, sheet_name= "目標值(Y)相關錶點資料")
       self.y_status = True
   
-  def set_MinMaxScaler(self):
+  def set_scaler(self, scale_method):
     
-    self.mm_a = MinMaxScaler()
-    self.mm_s = MinMaxScaler()
-    self.mm_y = MinMaxScaler()
+    if scale_method == "MinMax":
+      self.mm_a = MinMaxScaler()
+      self.mm_s = MinMaxScaler()
+      self.mm_y = MinMaxScaler()
+    elif scale_method == "Standard":
+      self.mm_a = StandardScaler()
+      self.mm_s = StandardScaler()
+      self.mm_y = StandardScaler()
     
   def select_col(self):
     
@@ -102,7 +106,7 @@ class process():
     # 
     # train_index = sorted(train_index)
     # test_index = sorted(test_index)
-    
+    # 
     # self.mm_a.fit(self.df_xy.loc[train_index, self.a_col])
     # self.mm_s.fit(self.df_xy.loc[train_index, self.s_col])
     # self.mm_y.fit(self.df_xy.loc[train_index, self.y_col])
@@ -131,8 +135,10 @@ class process():
   
   def dataset_index(self):
     
-    self.train_index = [i for i in self.select_index[:self.cut_point]]
-    self.test_index = [i for i in self.select_index[self.cut_point:]]
+    # self.train_index = [i for i in self.select_index[:self.cut_point]]
+    # self.test_index = [i for i in self.select_index[self.cut_point:]]
+    self.train_index = [i for i in range(self.time_step-1, self.cut_point, self.time_step)]
+    self.test_index = [i for i in range(self.cut_point, len(self.select_index), self.time_step)]
   
   def split_dataset(self, index_list):
     
@@ -178,7 +184,7 @@ class process():
     data = {
       "train_data":self.train_data,
       "test_data":self.test_data,
-      # "mm_scale":self.store_mm_scaler(),
+      "mm_scale":self.store_mm_scaler(),
       "col_name":self.store_col_dict()
       }
       
@@ -203,15 +209,16 @@ if __name__=="__main__":
     "ARO2-LIMS-S907@Water"
     ]
   
-  y_col = ["ARO2-LIMS-s922@MX"]  # "ARO2-LIMS-s922@MX" "ARO2-DCS-PDI91201"
+  y_col = ["ARO2-LIMS-s922@MX"]  # "ARO2-LIMS-s922@MX" "ARO2-DCS-PDI91101" "ARO2-DCS-PDI91201"
   
+  scale_method = "Standard"
   method = "fill"
   x_conditon = 470
-  y_condition = 1700 # 1700 4
-  proportion = 0.95
-  time_step = 8
+  y_condition = 4 # 1700 4
+  proportion = 0.9
+  time_step = 4
   
-  Process = process(path = "data/R911R912 _明志蔡教授_R4-ARO2.xlsx", a_col = a_col, s_col = s_col, y_col = y_col, time_step = time_step)
+  Process = process(path = "data/R911R912 _明志蔡教授_R4-ARO2.xlsx", a_col = a_col, s_col = s_col, y_col = y_col, time_step = time_step, scale_method = scale_method)
   Process.pre_process_df(method = method, x_conditon = x_conditon, y_condition = y_condition)
   Process.set_dataset(proportion = proportion)
   Process.save_to_pkl()
