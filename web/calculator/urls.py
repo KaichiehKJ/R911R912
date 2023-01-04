@@ -19,7 +19,8 @@ from django.urls import path
 from . import  views
 
 urlpatterns = [
-    path("R911/", views.r911, name="r911"),
-    path("R912/", views.r912, name="r912"),
-    path("MX/", views.mx, name="mx"),
+    path("", views.home, name="home"),
+    path("time/R911/", views.r911, name="r911"),
+    path("time/R912/", views.r912, name="r912"),
+    path("time/MX/", views.mx, name="mx"),
 ]

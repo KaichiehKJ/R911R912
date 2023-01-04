@@ -1,109 +1,156 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>calculator</title>
-        <link rel="stylesheet" type="text/css" href="/static/css/r911.css"/>
+        <title>R911R912</title>
+        <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css"/>
+        <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+<!--        <link rel="stylesheet" type="text/css" href="/static/css/r911.css"/>-->
     </head>
 
     <body>
-        <div class="title">
-            <div class="title-text">
-                R911 時間推估
-            </div>
-            <div class="title-note">
-                <div class="block">
-                    <div class="block-text">
-                        Input:
-                    </div>
-                    <div class="block-fig-1"></div>
+        <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/home">R911R912</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" aria-current="page" href="/home/time/R911">時間推估</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">操作預測(開發中)</a>
+                        </li>
+                    </ul>
                 </div>
-                <div class="block">
-                    <div class="block-text">
-                        Output:
-                    </div>
-                    <div class="block-fig-2"></div>
-                </div>
             </div>
-        </div>
+        </nav>
 
-        <div class="link">
-            <a class="btn" href="{% url 'r912' %}">
-                R912
-            </a>
-            <a class="btn" href="{% url 'mx' %}">
-                MX
-            </a>
-        </div>
-        <form action="{% url 'r911' %}" method="post">
-            {% csrf_token %}
-            <div class="body">
-                <div class="side-body">
-                    <div class="side-body-title">Input:Data</div>
-    
-                    <div class="input">
-                        <div class="input-title">1.進料量:</div>
-                        <div class="input-fig">
-                            <input type="text" id="number" name="FI91601" required="required"/>
+        <section class="pt-4">
+            <div class="container d-flex justify-content-center">
+                <div class="row">
+                    <div class="col">
+                        <h2 class="mb-3 text-center">R911 時間推估</h2>
+                        <form method="POST">
+                        {% csrf_token %}
+                            <div class="form-group row mb-3">
+                                <h5>進料量(FI91601)：</h5>
+                                <div class="col mt-2">
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text">MAX：</span>
+                                        <input type="number" id="FI91601_max" name="FI91601_max" required="required" value="567.08" step="0.001" class="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="col mt-2">
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text">MIN：</span>
+                                        <input type="number" id="FI91601_min" name="FI91601_min" required="required" value="446.61" step="0.001" class="form-control"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                <h5>FA：</h5>
+                                <div class="col mt-2">
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text">MAX：</span>
+                                        <input type="number" id="FA_max" name="FA_max" required="required" value="0.505" step="0.001" class="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="col mt-2">
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text">MIN：</span>
+                                        <input type="number" id="FA_min" name="FA_min" required="required" value="0.503" step="0.001" class="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="col mt-2">
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text">調整幅度：</span>
+                                        <input type="number" id="FA_step" name="FA_step" required="required" value="0.001" step="0.001" class="form-control"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                <h5>L2：</h5>
+                                <div class="col mt-2">
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text">MAX：</span>
+                                        <input type="number" id="L2_max" name="L2_max" required="required" value="0.48" step="0.001" class="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="col mt-2">
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text">MIN：</span>
+                                        <input type="number" id="L2_min" name="L2_min" required="required" value=0.345 step="0.001" class="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="col mt-2">
+                                    <div class="input-group mb-1">
+                                        <span class="input-group-text">調整幅度：</span>
+                                        <input type="number" id="L2_step" name="L2_step" required="required" value="0.001" step="0.001" class="form-control"/>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr/>
+                            <h5>其他參數：</h5>
+                            <div class="form-group row mb-3">
+                                <div class="input-group mb-1 mt-2">
+                                    <span class="input-group-text">萃取油含水量：</span>
+                                    <input type="number" id="LIMS-S905@Water" name="LIMS-S905@Water" value="0" required="required" step="0.001" class="form-control"/>
+                                </div>
+                            </div>
+
+                            <div class="form-group row mb-3">
+                                <div class="input-group mb-1">
+                                    <span class="input-group-text">萃餘油含水量：</span>
+                                    <input type="number" id="LIMS-S907@Water" name="LIMS-S907@Water" value="0" required="required" step="0.001" class="form-control"/>
+                                </div>
+                            </div>
+
+
+
+                            <div class="form-group row mb-3">
+                                <div class="input-group mb-1">
+                                    <span class="input-group-text">現有壓差與上限差距：</span>
+                                    <input type="number" id="PDI91101" name="PDI91101" value="0" required="required" step="0.001" class="form-control"/>
+                                </div>
+                            </div>
+
+                            <div class="row align-items-center">
+                                <div class="col-1">
+                                    <input type="submit" value="Analysis">
+                                </div>
+                                <div class="col-1">
+                                        <span style="color:red">{{analysis}}</span>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div class="row align-items-center">
+                                <div class="col">
+                                    <input type="button" onclick="location.href='/static/result/r911_time.csv'" value="Download">
+                                </div>
                         </div>
-                    </div>
-                    <div class="input">
-                        <div class="input-title">2.萃取油含水量:</div>
-                        <div class="input-fig">
-                            <input type="text" id="number" name="LIMS-S905@Water" required="required"/>
-                        </div>
-                    </div>
-                    <div class="input">
-                        <div class="input-title">3.萃餘油含水量:</div>
-                        <div class="input-fig">
-                            <input type="text" id="number" name="LIMS-S907@Water" required="required"/>
-                        </div>
-                    </div>
-                    <div class="input">
-                        <div class="input-title">4.FA:</div>
-                        <div class="input-fig">
-                            <input type="text" id="number" name="FA" required="required"/>
-                        </div>
-                    </div>
-                    <div class="input">
-                        <div class="input-title">5.L2:</div>
-                        <div class="input-fig">
-                            <input type="text" id="number" name="L2" required="required"/>
-                        </div>
-                    </div>
-                    <div class="input">
-                        <div class="input-title">6.現有壓差與上限差距:</div>
-                        <div class="input-fig">
-                            <input type="text" id="number" name="PDI91101" required="required"/>
-                        </div>
-                    </div>
-                    <div class="input">
-                        <button class="button" type="submit">Analysis</button>
-                    </div>
-                </div>
-    
-                <div class="side-body">
-                    <div class="side-body-title">Output:Time</div>
-    
-                    <div class="method">
-                        <div class="method-title">1.Linear:</div>
-                        <div class="method-fig">
-                            <div class="output-text">{{Linear}}</div>
-                        </div>
-                    </div>
-                    <div class="method">
-                        <div class="method-title">2.Lasso:</div>
-                        <div class="method-fig">
-                            <div class="output-text">{{Lasso}}</div>
-                        </div>
-                    </div>
-                    <div class="method">
-                        <div class="method-title">3.Polynomial(2次方):</div>
-                        <div class="method-fig">
-                            <div class="output-text">{{Polynomial}}</div>
+
+                        <hr/>
+                        <div class="row align-items-center">
+                            <div class="col-1" style="width:9rem">
+                                其他時間推估：
+                            </div>
+
+                            <div class="col-1 me-3">
+                                <input class="btn btn-outline-primary" type="button" onclick="location.href='/home/time/R912'" value="R912">
+                            </div>
+                            <div class="col-1">
+                                <input class="btn btn-outline-primary" type="button" onclick="location.href='/home/time/MX'" value="MX">
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </form>
+        </section>
     </body>
 </html>
