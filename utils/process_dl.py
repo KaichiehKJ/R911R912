@@ -48,11 +48,11 @@ class process():
     else:
       self.df_y = self.df_y[y_col]
     
-    self.df_x = self.df_x[self.s_col + self.a_col]
+    self.df_x = self.df_x[["Unnamed: 0"] + self.s_col + self.a_col]
     
   def cover_numeeric(self, df):
     
-    for col in df.columns:
+    for col in df.columns[1:]:
       df[col] = pd.to_numeric(df[col], errors='coerce')
       
     return df
@@ -81,6 +81,24 @@ class process():
     self.df_xy.reset_index(drop = True, inplace = True)
     self.df_xy = self.cover_numeeric(df = self.df_xy)
     
+    
+  def mean_by_day(self):
+    
+    self.df_xy["Unnamed: 0"] = self.df_xy["Unnamed: 0"].dt.strftime('%Y-%m-%d')
+    time_seq = self.df_xy["Unnamed: 0"]
+    time_seq = list(set(time_seq))
+    time_seq.sort()
+    new_df = None
+    for time in time_seq:
+      if new_df is None:
+        new_df = pd.DataFrame(self.df_xy.loc[self.df_xy["Unnamed: 0"] == time, self.s_col+self.a_col+self.y_col].mean()).T
+      else:
+        mean_table = pd.DataFrame(self.df_xy.loc[self.df_xy["Unnamed: 0"] == time, self.s_col+self.a_col+self.y_col].mean()).T
+        new_df = pd.concat([new_df, mean_table], ignore_index = True)
+    
+    self.df_xy = new_df
+  
+    
   def pre_process_df(self, method, x_conditon, y_condition):
     
     self.select_col()
@@ -88,6 +106,7 @@ class process():
     self.fill_data(method = method)
     self.merge_data()
     self.exclude_value(x_conditon = x_conditon, y_condition = y_condition)
+    self.mean_by_day()
 
   def set_selectindex_cutpoint(self, proportion = 0.95):
     
@@ -96,7 +115,7 @@ class process():
   
   def scale_transform(self):
     
-    # for i in range(0,8): # T 4:(3+1) 8:(7+1)
+    # for i in range(0,4): # T 4:(3+1) 8:(7+1)
     #   if i == 0:
     #     train_index = self.select_index[:self.cut_point]
     #     test_index = self.select_index[self.cut_point:]
@@ -120,25 +139,25 @@ class process():
     # self.df_xy.loc[test_index, self.s_col] = self.mm_s.transform(self.df_xy.loc[test_index, self.s_col])
     # self.df_xy.loc[test_index, self.y_col[0]] = self.mm_y.transform(self.df_xy.loc[test_index, self.y_col])[:,0]
     
-    self.mm_a.fit(self.df_xy.loc[:self.select_index[self.cut_point], self.a_col])
-    self.mm_s.fit(self.df_xy.loc[:self.select_index[self.cut_point], self.s_col])
-    self.mm_y.fit(self.df_xy.loc[:self.select_index[self.cut_point], self.y_col])
+    self.mm_a.fit(self.df_xy.loc[self.select_index[0]:self.select_index[self.cut_point], self.a_col])
+    self.mm_s.fit(self.df_xy.loc[self.select_index[0]:self.select_index[self.cut_point], self.s_col])
+    self.mm_y.fit(self.df_xy.loc[self.select_index[0]:self.select_index[self.cut_point], self.y_col])
 
     # train
-    self.df_xy.loc[:self.select_index[self.cut_point], self.a_col] = self.mm_a.transform(self.df_xy.loc[:self.select_index[self.cut_point], self.a_col])
-    self.df_xy.loc[:self.select_index[self.cut_point], self.s_col] = self.mm_s.transform(self.df_xy.loc[:self.select_index[self.cut_point], self.s_col])
-    self.df_xy.loc[:self.select_index[self.cut_point], self.y_col[0]] = self.mm_y.transform(self.df_xy.loc[:self.select_index[self.cut_point], self.y_col])[:,0]
+    self.df_xy.loc[self.select_index[0]:self.select_index[self.cut_point], self.a_col] = self.mm_a.transform(self.df_xy.loc[self.select_index[0]:self.select_index[self.cut_point], self.a_col])
+    self.df_xy.loc[self.select_index[0]:self.select_index[self.cut_point], self.s_col] = self.mm_s.transform(self.df_xy.loc[self.select_index[0]:self.select_index[self.cut_point], self.s_col])
+    self.df_xy.loc[self.select_index[0]:self.select_index[self.cut_point], self.y_col[0]] = self.mm_y.transform(self.df_xy.loc[self.select_index[0]:self.select_index[self.cut_point], self.y_col])[:,0]
     # test
-    self.df_xy.loc[self.select_index[self.cut_point]:, self.a_col] = self.mm_a.transform(self.df_xy.loc[self.select_index[self.cut_point]:, self.a_col])
-    self.df_xy.loc[self.select_index[self.cut_point]:, self.s_col] = self.mm_s.transform(self.df_xy.loc[self.select_index[self.cut_point]:, self.s_col])
-    self.df_xy.loc[self.select_index[self.cut_point]:, self.y_col[0]] = self.mm_y.transform(self.df_xy.loc[self.select_index[self.cut_point]:, self.y_col])[:,0]
-  
+    self.df_xy.loc[self.select_index[self.cut_point]:self.select_index[-1], self.a_col] = self.mm_a.transform(self.df_xy.loc[self.select_index[self.cut_point]:self.select_index[-1], self.a_col])
+    self.df_xy.loc[self.select_index[self.cut_point]:self.select_index[-1], self.s_col] = self.mm_s.transform(self.df_xy.loc[self.select_index[self.cut_point]:self.select_index[-1], self.s_col])
+    self.df_xy.loc[self.select_index[self.cut_point]:self.select_index[-1], self.y_col[0]] = self.mm_y.transform(self.df_xy.loc[self.select_index[self.cut_point]:self.select_index[-1], self.y_col])[:,0]
+    
   def dataset_index(self):
     
     # self.train_index = [i for i in self.select_index[:self.cut_point]]
     # self.test_index = [i for i in self.select_index[self.cut_point:]]
-    self.train_index = [i for i in range(self.time_step-1, self.cut_point, self.time_step)]
-    self.test_index = [i for i in range(self.cut_point, len(self.select_index), self.time_step)]
+    self.train_index = [i for i in range(self.select_index[8], self.select_index[self.cut_point], self.time_step)]
+    self.test_index = [i for i in range(self.select_index[self.cut_point], self.select_index[-1], self.time_step)]
   
   def split_dataset(self, index_list):
     
@@ -156,6 +175,7 @@ class process():
     for key, value in  dataset_dict.items():
       dataset_dict[key] = np.array(value)
     
+    print(dataset_dict["state"].shape, dataset_dict["action"].shape, dataset_dict["value"].shape)
     return dataset_dict
   
   def store_mm_scaler(self):
@@ -211,12 +231,12 @@ if __name__=="__main__":
   
   y_col = ["ARO2-LIMS-s922@MX"]  # "ARO2-LIMS-s922@MX" "ARO2-DCS-PDI91101" "ARO2-DCS-PDI91201"
   
-  scale_method = "Standard"
+  scale_method = "MinMax" # "Standard"
   method = "fill"
   x_conditon = 470
-  y_condition = 4 # 1700 4
-  proportion = 0.9
-  time_step = 4
+  y_condition = 1700 # 1700 4
+  proportion = 0.90
+  time_step = 8
   
   Process = process(path = "data/R911R912 _明志蔡教授_R4-ARO2.xlsx", a_col = a_col, s_col = s_col, y_col = y_col, time_step = time_step, scale_method = scale_method)
   Process.pre_process_df(method = method, x_conditon = x_conditon, y_condition = y_condition)
