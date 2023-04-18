@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from model.reinforcement import R2D2, ActorCritic
 from model.CNNLSTM import cnn_lstm
-
+import matplotlib.pyplot as plt
 
 class Main():
   def __init__(self, path, batch_size, hidden_size, gpu_id):
@@ -107,7 +107,7 @@ class Main():
             pass
   
   
-  def set_model(self, device, method, hidden_size):
+  def set_model(self, device, method, hidden_size, time_step, bidirectional):
     
     if method == "reinforcement":
       actor = R2D2(self.state_size + self.request_size, self.action_size, self.hidden_size)
@@ -115,7 +115,7 @@ class Main():
       self.model = ActorCritic(actor, critic, self.time_step, device, self.gpu_id)
       self.model.cuda(device = self.gpu_id)
     elif method == "cnn_lstm":
-      self.model = cnn_lstm(device = device, hidden_size = hidden_size)
+      self.model = cnn_lstm(device = device, hidden_size = hidden_size, time_step = time_step, bidirectional = bidirectional)
       self.model.cuda(device = self.gpu_id)
       self.model.apply(self.init_weights)
       
@@ -153,7 +153,7 @@ class Main():
     for epoch in range(epochs):
       epoch_loss = 0
       for i, (bs, _, ba, bv) in enumerate(self.train_iter):
-        if i <= 445: #206, 445
+        if i <= 17: #206, (445, 195), (470) 178 256
           y_pred = self.model(state = bs.cuda(device = self.gpu_id), action = ba.cuda(device = self.gpu_id))
           loss = loss_fn(y_pred, bv.cuda(device = self.gpu_id))
           # update weights
@@ -163,9 +163,9 @@ class Main():
           
           epoch_loss += loss.item()
       
-      train_history.append(epoch_loss/470)
+      train_history.append(epoch_loss/17)
       if epoch % 10 == 0:
-        print('epoch:{} loss:{}'.format(epoch, epoch_loss/470))
+        print('epoch:{} loss:{}'.format(epoch, epoch_loss/17))
         
   def pred_test(self):
     
@@ -183,7 +183,7 @@ class Main():
     pred_value = []
     self.model.eval()
     
-    for i in range(794):
+    for i in range(66):
       s,r,a,v = next(iter(self.test_iter))
       y_pred = self.model(state = s.cuda(device = self.gpu_id), action = a.cuda(device = self.gpu_id))
       
@@ -199,21 +199,30 @@ class Main():
     print('r2', r2_score(real_value[:,0], pred_value[:,0]))
     print('MAPE',mape(real_value[:,0],pred_value[:,0]))
     print("RMSE:", rmse(real_value[:,0], pred_value[:,0]))
+    
+    torch.save(self.model.state_dict(),'result/model/R912.pth')
+    
+    plt.figure(figsize=(20,5))
+    plt.plot(pd.Series(pred_value[:,0]).rolling(1).mean(),label='pred')
+    plt.plot(pd.Series(real_value[:,0]).rolling(1).mean(),label='real')
+    plt.legend()
+    plt.savefig('result/plot/plot.png')
 
 
 if __name__=="__main__":
   
   path = "result/pre_process_data/ARO2-LIMS-s922@MX_dataset.pkl"
-  
+  time_step = 4
   batch_size = 32
   hidden_size = 128
   epochs = 100
   gpu_id = 6
   device = "cuda:6"
+  bidirectional = False
 
   main = Main(path = path, batch_size = batch_size, hidden_size = hidden_size, gpu_id = gpu_id)
   main.creat_iter()
-  main.set_model(device = device, method = "cnn_lstm", hidden_size = hidden_size)
+  main.set_model(device = device, method = "cnn_lstm", hidden_size = hidden_size, time_step = time_step, bidirectional = bidirectional)
   main.train_lstm(epochs = epochs)
   main.pred_test()
 
